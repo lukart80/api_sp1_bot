@@ -1,7 +1,8 @@
 import logging
-from logging.handlers import RotatingFileHandler
 import os
 import time
+from logging.handlers import RotatingFileHandler
+
 import requests
 import telegram
 from dotenv import load_dotenv
@@ -19,7 +20,9 @@ bot = telegram.Bot(token=TELEGRAM_TOKEN)
 logging.basicConfig(
     format='%(asctime)s, %(levelname)s, %(name)s, %(message)s',
     filename='bot.log',
-    filemode='w'
+    filemode='w',
+    level=logging.DEBUG
+
 )
 
 logger = logging.getLogger(__name__)
@@ -67,7 +70,7 @@ def main():
                 send_message(homework_status)
 
             time.sleep(23 * 60)
-            current_timestamp = int(time.time()) - (60 * 25)
+            current_timestamp = int(time.time())
 
         except Exception as e:
             logging.exception(e)
