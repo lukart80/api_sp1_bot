@@ -38,6 +38,7 @@ STATUS_VERDICT = {
     'rejected': 'К сожалению, в работе нашлись ошибки.',
     'approved': 'Ревьюеру всё понравилось, работа зачтена!'
 }
+TIMEOUT = 60 * 23
 
 try:
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
@@ -102,13 +103,13 @@ def main():
                 homework_status = parse_homework_status(new_homework)
                 send_message(homework_status)
 
-            time.sleep(23 * 60)
+            time.sleep(TIMEOUT)
             current_timestamp = int(time.time())
 
         except (KeyError, BadRequest, Unauthorized, RequestException) as e:
             logging.exception(e)
             send_message(f'Бот упал с ошибкой {e}')
-            time.sleep(5)
+            time.sleep(TIMEOUT)
 
 
 if __name__ == '__main__':
