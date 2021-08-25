@@ -92,7 +92,7 @@ def send_message(message):
 
 
 def main():
-    current_timestamp = 0  # int(time.time())
+    current_timestamp = int(time.time())
     logging.debug('Бот запущен!')
     while True:
         try:
@@ -104,7 +104,7 @@ def main():
                 send_message(homework_status)
 
             time.sleep(23 * 60)
-            current_timestamp = 0  # int(time.time())
+            current_timestamp = int(time.time())
 
         except (KeyError, BadRequest, Unauthorized, RequestException) as e:
             logging.exception(e)
