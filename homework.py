@@ -5,10 +5,10 @@ import time
 from logging.handlers import RotatingFileHandler
 
 import requests
-from requests.exceptions import RequestException
 import telegram
-from telegram.error import BadRequest, Unauthorized, InvalidToken
 from dotenv import load_dotenv
+from requests.exceptions import RequestException
+from telegram.error import BadRequest, InvalidToken, Unauthorized
 
 load_dotenv()
 
@@ -72,8 +72,7 @@ def get_homeworks(current_timestamp):
         params=params
     )
     homework_statuses = response.json()
-    if (homework_statuses.get('error') or
-            homework_statuses.get('code')):
+    if homework_statuses.get('error') or homework_statuses.get('code'):
         logging.exception('При отправке запроса к API возникла ошибка')
         error = homework_statuses.get('error')
         code = homework_statuses.get('code')
