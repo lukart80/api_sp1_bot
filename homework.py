@@ -51,7 +51,6 @@ except InvalidToken:
 
 def parse_homework_status(homework):
     """Функция для получения статуса домашней работы."""
-
     homework_name = homework.get('homework_name')
     homework_status = homework.get('status')
     if (homework_name or homework_status) is None:
@@ -69,16 +68,13 @@ def get_homeworks(current_timestamp):
     """Функция для получения данных о домашних работах от API
     яндекс практикума."""
     params = {'from_date': current_timestamp}
+    request_dict = dict(url=PRAKTIKUM_URL, headers=HEADERS, params=params)
     response = requests.get(
-        url=PRAKTIKUM_URL,
-        headers=HEADERS,
-        params=params
+        **request_dict
     )
     homework_statuses = response.json()
     if homework_statuses.get('error') or homework_statuses.get('code'):
-        logging.exception(f'При отправке запроса к API возникла ошибка.'
-                          f'Параметры запроса url: {PRAKTIKUM_URL}, headers: '
-                          f'{HEADERS}, params: {params}')
+        logging.exception(f'При отправке запроса ошибка {request_dict}')
         error = homework_statuses.get('error')
         code = homework_statuses.get('code')
         raise RequestException(f'{error}, код {code}')
@@ -95,7 +91,7 @@ def send_message(message):
 
 
 def main():
-    current_timestamp = int(time.time())
+    current_timestamp = int(time.time()) - (60 * 26)
     logging.debug('Бот запущен!')
     while True:
         try:
@@ -107,7 +103,7 @@ def main():
                 send_message(homework_status)
 
             time.sleep(TIMEOUT)
-            current_timestamp = int(time.time())
+            current_timestamp = int(time.time()) - (60 * 26)
 
         except (KeyError, BadRequest, Unauthorized, RequestException,
                 ValueError) as e:
