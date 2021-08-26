@@ -36,15 +36,17 @@ PRAKTIKUM_URL = 'https://praktikum.yandex.ru/api/user_api/homework_statuses/'
 HEADERS = {'Authorization': f'OAuth {PRAKTIKUM_TOKEN}'}
 STATUS_VERDICT = {
     'rejected': 'К сожалению, в работе нашлись ошибки.',
-    'approved': 'Ревьюеру всё понравилось, работа зачтена!'
+    'approved': 'Ревьюеру всё понравилось, работа зачтена!',
+    'reviewing': 'Работа взята в ревью.'
 }
 TIMEOUT = 60 * 23
+ERROR_TIMEOUT = 5
 
 try:
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
 except InvalidToken:
     logging.exception('Не удалось инциализировать бота.')
-    sys.exit()
+    sys.exit(1)
 
 
 def parse_homework_status(homework):
@@ -58,15 +60,15 @@ def parse_homework_status(homework):
 
     verdict = STATUS_VERDICT.get(homework_status)
     if verdict is None:
-        logging.exception('Неизветный ключ для статуса.')
-        raise KeyError('Неизвестный ключ для статуса.')
+        logging.exception(f'Неизветный ключ для статуса {homework_status}.')
+        raise KeyError(f'Неизвестный ключ для статуса. {homework_status}')
     return f'У вас проверили работу "{homework_name}"!\n\n{verdict}'
 
 
 def get_homeworks(current_timestamp):
     """Функция для получения данных о домашних работах от API
     яндекс практикума."""
-    params = {'from_date': current_timestamp}
+    params = {'from_date': int(current_timestamp)}
     response = requests.get(
         url=PRAKTIKUM_URL,
         headers=HEADERS,
@@ -74,7 +76,9 @@ def get_homeworks(current_timestamp):
     )
     homework_statuses = response.json()
     if homework_statuses.get('error') or homework_statuses.get('code'):
-        logging.exception('При отправке запроса к API возникла ошибка')
+        logging.exception(f'При отправке запроса к API возникла ошибка.'
+                          f'Параметры запроса url: {PRAKTIKUM_URL}, headers: '
+                          f'{HEADERS}, params: {params}')
         error = homework_statuses.get('error')
         code = homework_statuses.get('code')
         raise RequestException(f'{error}, код {code}')
@@ -88,7 +92,6 @@ def send_message(message):
         logging.info('Бот послал сообщение!')
     except BadRequest:
         logging.exception('Не получилось отправить сообщение')
-        raise BadRequest('Не верный номер чата')
 
 
 def main():
@@ -109,7 +112,7 @@ def main():
         except (KeyError, BadRequest, Unauthorized, RequestException) as e:
             logging.exception(e)
             send_message(f'Бот упал с ошибкой {e}')
-            time.sleep(TIMEOUT)
+            time.sleep(ERROR_TIMEOUT)
 
 
 if __name__ == '__main__':
