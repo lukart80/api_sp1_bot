@@ -68,9 +68,6 @@ def parse_homework_status(homework):
 def get_homeworks(current_timestamp):
     """Функция для получения данных о домашних работах от API
     яндекс практикума."""
-    if not isinstance(current_timestamp, float):
-        logging.exception(f'Неверный тип timestamp: {type(current_timestamp)}')
-        raise ValueError('Неверный тип timestamp.')
     params = {'from_date': current_timestamp}
     response = requests.get(
         url=PRAKTIKUM_URL,
