@@ -68,7 +68,10 @@ def parse_homework_status(homework):
 def get_homeworks(current_timestamp):
     """Функция для получения данных о домашних работах от API
     яндекс практикума."""
-    params = {'from_date': int(current_timestamp)}
+    if not isinstance(current_timestamp, float):
+        logging.exception(f'Неверный тип timestamp: {type(current_timestamp)}')
+        raise ValueError('Неверный тип timestamp.')
+    params = {'from_date': current_timestamp}
     response = requests.get(
         url=PRAKTIKUM_URL,
         headers=HEADERS,
@@ -109,7 +112,8 @@ def main():
             time.sleep(TIMEOUT)
             current_timestamp = int(time.time())
 
-        except (KeyError, BadRequest, Unauthorized, RequestException) as e:
+        except (KeyError, BadRequest, Unauthorized, RequestException,
+                ValueError) as e:
             logging.exception(e)
             send_message(f'Бот упал с ошибкой {e}')
             time.sleep(ERROR_TIMEOUT)
